@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+ 		http://www.springframework.org/schema/tx
+ 		http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+
+	<!-- 数据源 -->
+	<beans:bean id="dataSourceBean" class="com.luysoft.framework.db.datasources.DataSourceBean" abstract="true" />
+	<!-- 引入配置文件 -->
+	<context:property-placeholder location="WEB-INF/conf/jdbc.properties" ignore-unresolvable="true"/>
+	
+	<beans:bean id="dataSourceImpl" parent="dataSourceBean" destroy-method="close">
+		<beans:property name="driverClassName" value="${jdbc.driver}" />
+		<beans:property name="url" value="${jdbc.url}" />
+		<beans:property name="username" value="${jdbc.username}" />
+		<beans:property name="password" value="${jdbc.password}" />
+		<beans:property name="defaultAutoCommit" value="${jdbc.defaultAutoCommit}" />
+		<beans:property name="initialSize" value="${jdbc.initialSize}" />
+		<beans:property name="maxTotal" value="${jdbc.maxTotal}" />
+		<beans:property name="maxIdle" value="${jdbc.maxIdle}" />
+		<beans:property name="minIdle" value="${jdbc.minIdle}" />
+		<beans:property name="validationQuery" value="${jdbc.validationQuery}" />
+		<beans:property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+		<beans:property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+		<beans:property name="testOnBorrow" value="${jdbc.testOnBorrow}" />
+	</beans:bean>
+
+	<beans:bean id="dataSource" class="com.luysoft.framework.db.datasources.DataSource">
+		<beans:property name="targetDataSources">  
+			<beans:map key-type="java.lang.String">  
+				<beans:entry value-ref="dataSourceImpl" key="impl"></beans:entry>
+			</beans:map>  
+		</beans:property>  
+		<beans:property name="defaultTargetDataSource" ref="dataSourceImpl"></beans:property>
+	</beans:bean>
+
+	<!-- MyBatis -->
+	<beans:bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="typeAliasesPackage" value="com.luysoft.wlfedu.dto" />
+		<beans:property name="mapperLocations" value="classpath:com/luysoft/wlfedu/dao/mapping/*.xml" />
+	</beans:bean>
+
+	<!-- DAO类（Mapper类）接口所在包名，Spring会自动查找其下的类 -->
+	<beans:bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<beans:property name="basePackage" value="com.luysoft.wlfedu.dao" />
+		<beans:property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</beans:bean>
+
+	<!-- 事务管理 -->
+	<beans:bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<beans:property name="dataSource" ref="dataSource" />
+	</beans:bean>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans:beans>

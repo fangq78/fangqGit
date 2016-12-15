@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.DeviceBasicMapper" >
+
+	<resultMap id="BaseResultMap" type="DeviceBasic" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="code_name" property="codeName" jdbcType="VARCHAR" />
+		<result column="factory" property="factory" jdbcType="VARCHAR" />
+		<result column="brand" property="brand" jdbcType="VARCHAR" />
+		<result column="model" property="model" jdbcType="VARCHAR" />
+		<result column="count" property="count" jdbcType="INTEGER" />
+	</resultMap>
+
+	<!-- 新增工具基本信息 -->
+	<insert id="insert" parameterType="DeviceBasic" >
+		INSERT INTO tbl_device_basic (
+			code,
+			factory,
+			brand,
+			model
+		) VALUES (
+			#{record.code},
+			#{record.factory},
+			#{record.brand}, 
+			#{record.model}
+		)
+	</insert>
+
+	<!-- 删除工具基本信息 -->
+	<delete id="delete" parameterType="java.lang.Integer" >
+		delete from tbl_device_basic
+		 WHERE id = #{id}
+	</delete>
+	
+	<!-- 删除工具基本信息 -->
+	<delete id="deleteByCode" parameterType="java.lang.String" >
+		delete from tbl_device_basic
+		 WHERE code = #{code}
+	</delete>
+
+	<!-- 修改工具基本信息 -->
+	<update id="update">
+		UPDATE tbl_device_basic
+		   SET  code = #{record.code},
+		  	    factory = #{record.factory},
+		   		brand = #{record.brand},
+		   		model = #{record.model}
+		 WHERE id = #{record.id}
+	</update>
+
+	<!-- 查询工具基本信息 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT b.id, 
+			   b.code,
+			   t.name as code_name,
+			   b.factory,
+			   b.brand,
+			   b.model
+		  FROM tbl_device_basic b , tbl_device_type t
+		 WHERE b.id = #{id} and b.code=t.code
+	</select>
+
+	<!-- 查询工具基本信息列表 -->
+	<select id="selectAll" resultMap="BaseResultMap" >
+		SELECT b.id, 
+			   b.code,
+			   t.name as code_name,
+			   b.factory,
+			   b.brand,
+			   b.model,
+			   d.count
+		  FROM tbl_device_type t,
+		 	   tbl_device_basic b left join
+		       (select basic_id,count(id) as count from tbl_device group by basic_id) d on d.basic_id = b.id
+		  <where>
+		    b.code=t.code
+		  	<if test="record.code != null and record.code !='' ">
+		  		AND (b.code LIKE CONCAT('%', #{record.code}, '%') or t.name LIKE CONCAT('%', #{record.code}, '%'))
+		  	</if>
+		  	<if test="record.factory != null and record.factory != '' ">
+				AND b.factory LIKE CONCAT('%', #{record.factory}, '%')
+			</if>
+		  	<if test="record.brand != null and record.brand !='' ">
+		  		AND b.brand LIKE CONCAT('%', #{record.brand}, '%')
+		  	</if>
+		  	<if test="record.model != null and record.model !='' ">
+		  		AND b.model LIKE CONCAT('%', #{record.model}, '%')
+		  	</if>
+		  </where>
+	</select>
+</mapper>

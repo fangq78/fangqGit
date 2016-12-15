@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.TeamUserMapper" >
+
+	<resultMap id="BaseResultMap" type="TeamUser" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="real_name" property="realName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="INTEGER" />
+		<result column="creator_id" property="creatorId" jdbcType="INTEGER" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="updater_id" property="updaterId" jdbcType="INTEGER" />
+		<result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+		<result column="depot_id" property="depotId" jdbcType="INTEGER" />
+		<result column="workshop_id" property="workshopId" jdbcType="INTEGER" />
+		<result column="team_id" property="teamId" jdbcType="INTEGER" />
+		<result column="depot_name" property="depotName" jdbcType="VARCHAR" />
+		<result column="workshop_name" property="workshopName" jdbcType="VARCHAR" />
+		<result column="team_name" property="teamName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增班组管理员 -->
+	<insert id="insert" >
+		INSERT INTO tbl_team_user (
+			name,
+			real_name,
+			password,
+			team_id,
+			mobile,
+			deleted,
+			creator_id,
+			created_time,
+			updater_id,
+			updated_time
+		) VALUES (
+			#{record.name},
+			#{record.realName},
+			#{record.password},
+			#{record.teamId},
+			#{record.mobile},
+			0,
+			#{userId},
+			NOW(),
+			#{userId},
+			NOW()
+		)
+	</insert>
+
+	<!-- 删除班组管理员 -->
+	<update id="delete" >
+		UPDATE tbl_team_user
+		SET deleted = 1,
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 删除班组管理员 -->
+	<update id="deleteByDepotId" >
+		UPDATE tbl_team_user u,tbl_workshop w,tbl_team t
+		SET u.deleted = 1
+		WHERE u.team_id = t.id and t.workshop_id=w.id and w.depot_id = #{depotId}
+	</update>
+	
+	<!-- 删除班组管理员 -->
+	<update id="deleteByWorkshopId" >
+		UPDATE tbl_team_user u,tbl_team t
+		SET u.deleted = 1
+		WHERE u.team_id = t.id and t.workshop_id=#{workshopId}
+	</update>
+	
+	<!-- 删除班组管理员 -->
+	<update id="deleteByTeamId" >
+		UPDATE tbl_team_user
+		SET deleted = 1
+		WHERE team_id = #{workshopId}
+	</update>
+
+	<!-- 修正班组管理员情报 -->
+	<update id="update">
+		UPDATE tbl_team_user
+		SET name = #{record.name},
+			real_name = #{record.realName},
+			team_id = #{record.teamId},
+			mobile = #{record.mobile},
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{record.id}
+	</update>
+
+	<!-- 修改班组管理员用户密码 -->
+	<update id="updatePassword" >
+		UPDATE tbl_team_user
+		SET password = #{password},
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{id}
+	</update>
+
+<!-- 根据用户名查询系统用户信息 -->
+	<select id="selectByName" resultMap="BaseResultMap" >
+		SELECT id,
+			   name,
+			   mobile,
+			   team_id
+		  FROM tbl_team_user
+		  WHERE name = #{name}
+		    AND deleted = 0
+	</select>
+	
+	<!-- 根据管理员id 查询管理员 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT tu.id,
+			   tu.name,
+			   tu.real_name,
+			   d.id as depot_id,
+			   w.id as workshop_id,
+			   tu.team_id,
+			   tu.mobile
+		  FROM tbl_team_user tu
+		  	   left join tbl_team t on tu.team_id = t.id and t.deleted=0
+		  	   left join tbl_workshop w on t.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		WHERE
+		  	tu.id = #{id} and tu.deleted=0 
+	</select>
+
+	<!-- 查询管理员 -->
+	<select id="list" resultMap="BaseResultMap" >
+		SELECT tu.id,
+			   tu.name,
+			   tu.real_name,
+			   d.name as depot_name,
+			   w.name as workshop_name,
+			   t.name as team_name,
+			   tu.mobile,
+			   tu.team_id,
+			   tu.password
+		  FROM tbl_team_user tu
+		       left join tbl_team t on tu.team_id = t.id and t.deleted=0
+		  	   left join tbl_workshop w on t.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		<where>
+		  	tu.deleted=0 
+		  	<if test="record.name != null and record.name != '' ">
+				AND (tu.name LIKE CONCAT('%', #{record.name}, '%') OR tu.real_name LIKE CONCAT('%', #{record.name}, '%'))
+			</if>
+		  	<if test="record.depotId != null and record.depotId >0 ">
+		  		and w.depot_id=#{record.depotId}
+		  	</if>
+		  	<if test="record.workshopId!= null and record.workshopId>0 ">
+		  		and t.workshop_id=#{record.workshopId}
+		  	</if>
+		  	<if test="record.teamId!= null and record.teamId>0 ">
+		  		and tu.team_id=#{record.teamId}
+		  	</if>
+		</where>
+	</select>
+	
+</mapper>

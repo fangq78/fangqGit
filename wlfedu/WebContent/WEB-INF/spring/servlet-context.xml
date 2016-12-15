@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		classpath:/org/springframework/beans/factory/xml/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+ 		http://www.springframework.org/schema/tx
+ 		http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<mvc:annotation-driven validator="validator"/>
+	<task:annotation-driven/>
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.luysoft"/>
+
+	<!-- resources  -->
+	<mvc:resources mapping="/resources/**" location="/WEB-INF/resources/" cache-period="31536000"/>
+
+	<!-- JSP  -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+	<beans:bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">  
+		<beans:property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>  
+		<beans:property name="validationMessageSource" ref="messageSource"/>  
+	</beans:bean>  
+	
+	<beans:bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">  
+		<beans:property name="basenames">  
+			<beans:list>
+				<beans:value>classpath:com/luysoft/wlfedu/message/Messages</beans:value>
+			</beans:list>  
+		</beans:property>  
+		<beans:property name="useCodeAsDefaultMessage" value="false"/>
+		<beans:property name="defaultEncoding" value="UTF-8"/>  
+	</beans:bean>
+	
+	<!-- 多文件上传 -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/> 
+
+	<!-- 配置文件 -->
+	<context:property-placeholder location="WEB-INF/conf/path.properties" ignore-unresolvable="true"/>
+	
+	<!-- interceptor -->
+	<beans:import resource="servlet-context-interceptor.xml" />
+
+	<!-- JDBC -->
+	<beans:import resource="servlet-context-jdbc.xml" />
+
+</beans:beans>

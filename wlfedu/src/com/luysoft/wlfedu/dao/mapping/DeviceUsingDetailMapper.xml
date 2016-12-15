@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.DeviceUsingDetailMapper" >
+
+	<resultMap id="BaseResultMap" type="DeviceUsingDetail" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="device_id" property="deviceId" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />		
+		<result column="use_flag" property="useFlag" jdbcType="INTEGER" />
+		<result column="use_datetime" property="useDatetime" jdbcType="VARCHAR" />
+		<result column="pad_name" property="padName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增设备使用情况记录 -->
+	<insert id="insert" parameterType="DeviceUsingDetail" >
+		INSERT INTO tbl_useing_detail (
+			device_id,
+			user_id,
+			user_name,
+			use_flag,
+			use_datetime,
+			pad_name
+		) VALUES (
+			#{deviceId},
+			#{userId},
+			#{userName}, 
+			#{useFlag},
+			#{useDatetime},
+			#{padName}
+		)
+	</insert>
+
+
+	<!-- 查询广告点击记录列表 -->
+	<select id="search" parameterType="DeviceUsingDetail" resultMap="BaseResultMap" >
+		SELECT id,
+			   device_id,
+			   user_id,
+			   user_name,
+			   use_flag,
+			   use_datetime,
+			   pad_name
+		  FROM tbl_useing_detail
+		<where>
+			1=1 
+			<if test="deviceId != null and deviceId >0 ">
+		  		and device_id=#{deviceId}
+		  	</if>
+			<if test="userId != null and userId != ''">
+				and user_id=#{userId}
+			</if>
+			<if test="userName != null and userName != ''">
+				AND user_name LIKE concat('%', #{userName}, '%')
+			</if>
+			<if test="useFlag != null and useFlag != ''">
+				and use_flag=#{useFlag}
+			</if>
+		</where>
+		 ORDER BY use_datetime
+	</select>
+</mapper>

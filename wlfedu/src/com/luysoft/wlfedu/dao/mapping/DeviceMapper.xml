@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.DeviceMapper" >
+
+	<resultMap id="BaseResultMap" type="Device" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="basic_id" property="basicId" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="depot_id" property="depotId" jdbcType="INTEGER" />
+		<result column="depot_name" property="depotName" jdbcType="VARCHAR" />
+		<result column="workshop_id" property="workshopId" jdbcType="INTEGER" />
+		<result column="workshop_name" property="workshopName" jdbcType="VARCHAR" />
+		<result column="team_id" property="teamId" jdbcType="INTEGER" />
+		<result column="team_name" property="teamName" jdbcType="VARCHAR" />
+		<result column="gen_code" property="genCode" jdbcType="VARCHAR" />
+		<result column="gen_image_url" property="genImageUrl" jdbcType="VARCHAR" />
+		<result column="gen_image_path" property="genImagePath" jdbcType="VARCHAR" />
+		<result column="use_flag" property="useFlag" jdbcType="INTEGER" />
+		<result column="lastest_user_id" property="lastestUserId" jdbcType="INTEGER" />
+		<result column="lastest_user_name" property="lastestUserName" jdbcType="VARCHAR" />
+		<result column="lastest_datetime" property="lastestDateTime" jdbcType="VARCHAR" />
+		<result column="factory" property="factory" jdbcType="VARCHAR" />
+		<result column="brand" property="brand" jdbcType="VARCHAR" />
+		<result column="model" property="model" jdbcType="VARCHAR" />
+		<result column="pad_name" property="padName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增工具信息 -->
+	<insert id="insert" parameterType="Device" >
+		<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+		INSERT INTO tbl_device (
+			basic_id,
+			name,
+			team_id,
+			gen_code,
+			gen_image_url,
+			gen_image_path
+		) VALUES (
+			#{basicId},
+			#{name},
+			#{teamId},
+			#{genCode},
+			#{genImageUrl},
+			#{genImagePath}
+		)
+	</insert>
+
+	<!-- 删除工具信息 -->
+	<delete id="delete" parameterType="java.lang.Integer" >
+		delete from tbl_device
+		 WHERE id = #{id}
+	</delete>
+	
+	<!-- 删除工具信息 -->
+	<delete id="deleteByBasicId" parameterType="java.lang.Integer" >
+		delete from tbl_device
+		 WHERE basic_id = #{basicId}
+	</delete>
+
+	<!-- 修改工具信息 -->
+	<update id="update">
+		UPDATE tbl_device
+		   SET  name = #{record.name},
+		   	    team_id=#{record.teamId},
+		   	    gen_code=#{record.genCode},
+		   	    gen_image_url=#{record.genImageUrl},
+		   	    gen_image_path=#{record.genImagePath}
+		 WHERE id = #{record.id}
+	</update>
+	
+	<!-- 修改工具信息 -->
+	<update id="updateUsingInfo">
+		UPDATE tbl_device
+		   SET  use_flag=#{record.useFlag},
+                lastest_user_id=#{record.lastestUserId},
+                lastest_user_name=#{record.lastestUserName},
+                lastest_datetime=#{record.lastestDateTime},
+                pad_name=#{record.padName}
+		 WHERE id = #{record.id}
+	</update>
+
+	<!-- 查询工具信息 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT de.id,
+			   de.basic_id,
+			   de.name,
+			   d.id as depot_id,
+			   w.id as workshop_id,
+			   t.id as team_id,
+			   de.gen_code,
+			   de.gen_image_url,
+			   de.gen_image_path
+		  FROM tbl_device de
+		       left join tbl_team t on de.team_id = t.id and t.deleted=0
+		  	   left join tbl_workshop w on t.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		<where>
+				de.id=#{id} 
+		</where>
+	</select>
+	
+	<!-- 查询工具 -->
+	<select id="list" resultMap="BaseResultMap" >
+		SELECT de.id,
+			   de.basic_id,
+			   de.name,
+			   d.name as depot_name,
+			   w.name as workshop_name,
+			   de.team_id,
+			   t.name as team_name,
+			   de.gen_code,
+			   de.gen_image_url,
+			   de.gen_image_path,
+               db.factory,
+               db.brand,
+               db.model,
+               de.use_flag,
+               de.lastest_user_id,
+               de.lastest_user_name,
+               de.lastest_datetime,
+               de.pad_name
+		  FROM tbl_device de 
+			   left join tbl_device_basic db on de.basic_id=db.id
+		       left join tbl_team t on de.team_id = t.id and t.deleted=0
+		  	   left join tbl_workshop w on t.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		<where>
+				1=1 
+			<if test="record.id != null and record.id != '' ">
+				AND de.id=#{record.id}
+			</if>
+			<if test="record.useFlag != null and record.useFlag >-1 ">
+				AND de.use_flag=#{record.useFlag}
+			</if>
+			<if test="record.basicId != null and record.basicId != '' ">
+				AND de.basic_id LIKE CONCAT('%', #{record.basicId}, '%') 
+			</if>
+		  	<if test="record.name != null and record.name != '' ">
+				AND de.name LIKE CONCAT('%', #{record.name}, '%') 
+			</if>
+			<if test="record.padName != null and record.padName != '' ">
+				AND de.pad_name LIKE CONCAT('%', #{record.padName}, '%')
+			</if>
+		  	<if test="record.depotId != null and record.depotId >0 ">
+		  		and w.depot_id=#{record.depotId}
+		  	</if>
+		  	<if test="record.workshopId!= null and record.workshopId>0 ">
+		  		and t.workshop_id=#{record.workshopId}
+		  	</if>
+		  	<if test="record.teamId!= null and record.teamId>0 ">
+		  		and de.team_id=#{record.teamId}
+		  	</if>
+		</where>
+	</select>
+</mapper>

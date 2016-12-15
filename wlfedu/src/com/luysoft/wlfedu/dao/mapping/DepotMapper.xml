@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.DepotMapper" >
+
+	<resultMap id="BaseResultMap" type="Depot" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="creator_id" property="creatorId" jdbcType="INTEGER" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="updater_id" property="updaterId" jdbcType="INTEGER" />
+		<result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<!-- 新增段 -->
+	<insert id="insert" parameterType="Depot" >
+		INSERT INTO tbl_depot (
+			name, 
+			mobile,
+			address,
+			creator_id,
+			created_time,
+			updater_id, 
+			updated_time
+		) VALUES (
+			#{record.name},
+			#{record.mobile}, 
+			#{record.address}, 
+			#{userId},
+			NOW(),
+			#{userId}, 
+			NOW()
+		)
+	</insert>
+
+	<!-- 删除段 -->
+	<delete id="delete" parameterType="java.lang.Integer" >
+		UPDATE tbl_depot
+		SET deleted=1
+		 WHERE id = #{id}
+	</delete>
+
+	<!-- 修改段 -->
+	<update id="update">
+		UPDATE tbl_depot
+		   SET name = #{record.name},
+		   		mobile = #{record.mobile},
+		   		address = #{record.address},
+			   updater_id = #{userId},
+			   updated_time = NOW()
+		 WHERE id = #{record.id}
+	</update>
+
+	<!-- 查询段 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT id, 
+			   name,
+			   mobile,
+			   address,
+			   creator_id,
+			   created_time,
+			   updater_id,
+			   updated_time
+		  FROM tbl_depot
+		 WHERE id = #{id}
+		        and deleted = 0
+	</select>
+
+	<!-- 查询段列表 -->
+	<select id="selectAll" resultMap="BaseResultMap" >
+		SELECT id, 
+			   name,
+			   mobile,
+			   address,
+			   creator_id,
+			   created_time,
+			   updater_id,
+			   updated_time
+		  FROM tbl_depot
+		  WHERE deleted = 0
+	</select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.DeviceTypeMapper" >
+
+	<resultMap id="BaseResultMap" type="DeviceType" >
+		<id column="code" property="code" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="comment" property="comment" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增物资编码 -->
+	<insert id="insert" parameterType="DeviceType" >
+		INSERT INTO tbl_device_type (
+			code, 
+			name, 
+			comment
+		) VALUES (
+			#{record.code},
+			#{record.name},
+			#{record.comment}
+		)
+	</insert>
+
+	<!-- 删除物资编码 -->
+	<delete id="delete" parameterType="java.lang.String" >
+		delete from tbl_device_type
+		 WHERE code = #{code}
+	</delete>
+
+	<!-- 修改物资编码 -->
+	<update id="update">
+		UPDATE tbl_device_type
+		   SET name = #{record.name},
+		   	   comment = #{record.comment}
+		 WHERE code = #{record.code}
+	</update>
+
+	<!-- 查询物资编码 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT code, 
+			   name,
+			   comment
+		  FROM tbl_device_type
+		 WHERE code = #{code}
+	</select>
+
+	<!-- 查询物资编码列表 -->
+	<select id="selectAll" resultMap="BaseResultMap" >
+		SELECT code, 
+			   name,
+			   comment
+		  FROM tbl_device_type
+		  <where> 
+		  	1=1
+		  	<if test="cond.code!=null and cond.code!=''">
+		  		and code LIKE CONCAT('%', #{cond.code}, '%')
+		  	</if>
+		  	<if test="cond.name!=null and cond.name!=''">
+		  		and name LIKE CONCAT('%', #{cond.name}, '%')
+		  	</if>
+		  </where>
+		  <if test="limit != null and limit >0 ">
+		  		limit 0,#{limit}
+		  </if>
+	</select>
+</mapper>

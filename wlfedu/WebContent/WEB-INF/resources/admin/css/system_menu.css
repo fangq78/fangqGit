@@ -1,0 +1,26 @@
+.header .fa-home {
+	color: #000;
+	font-size: medium;
+}
+
+.header .menu-header {
+	color: #000;
+	font-size: 15px;
+}
+
+.menu-header{
+	font-size: 2px;
+}
+
+.left_menu_contents{
+	word-break:normal; 
+	width:180px; 
+	display:list-item;
+	white-space:pre-wrap;
+	word-wrap : break-word ;
+	
+}
+
+.left_menu_contents_right{
+	margin-left: 8px;
+}

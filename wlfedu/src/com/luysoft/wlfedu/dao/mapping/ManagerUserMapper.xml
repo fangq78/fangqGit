@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.ManagerUserMapper" >
+
+	<resultMap id="BaseResultMap" type="ManagerUser" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="INTEGER" />
+		<result column="creator_id" property="creatorId" jdbcType="INTEGER" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="updater_id" property="updaterId" jdbcType="INTEGER" />
+		<result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+		<result column="depot_id" property="depotId" jdbcType="INTEGER" />
+		<result column="workshop_id" property="workshopId" jdbcType="INTEGER" />
+		<result column="depot_name" property="depotName" jdbcType="VARCHAR" />
+		<result column="workshop_name" property="workshopName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增管理员 -->
+	<insert id="insert" >
+		INSERT INTO tbl_manager_user (
+			name,
+			password,
+			type,
+			workshop_id,
+			mobile,
+			deleted,
+			creator_id,
+			created_time,
+			updater_id,
+			updated_time
+		) VALUES (
+			#{record.name},
+			#{record.password},
+			#{record.type},
+			#{record.workshopId},
+			#{record.mobile},
+			0,
+			#{userId},
+			NOW(),
+			#{userId},
+			NOW()
+		)
+	</insert>
+
+	<!-- 删除管理员 -->
+	<update id="delete" >
+		UPDATE tbl_manager_user
+		SET deleted = 1,
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 删除管理员 -->
+	<update id="deleteByDepotId" >
+		UPDATE tbl_manager_user m,tbl_workshop w
+		SET m.deleted = 1
+		WHERE w.depot_id=#{depotId} and m.type=1 and m.workshop_id=w.id
+	</update>
+	
+	<!-- 删除管理员 -->
+	<update id="deleteByWorkshopId" >
+		UPDATE tbl_manager_user
+		SET deleted = 1
+		WHERE m.type=1 and workshop_id=#{workshopId}
+	</update>
+
+	<!-- 修正车间管理员情报 -->
+	<update id="update">
+		UPDATE tbl_manager_user
+		SET name = #{record.name},
+			type = #{record.type},
+			workshop_id = #{record.workshopId},
+			mobile = #{record.mobile},
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{record.id}
+	</update>
+
+	<!-- 修改管理员用户密码 -->
+	<update id="updatePassword" >
+		UPDATE tbl_manager_user
+		SET password = #{password},
+			updater_id = #{userId},
+			updated_time = NOW()
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据管理员id 查询管理员 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT m.id,
+			   m.name,
+			   d.id as depot_id,
+			   m.workshop_id,
+			   m.type,
+			   m.mobile
+		  FROM tbl_manager_user m
+		  	   left join tbl_workshop w on m.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		WHERE
+		  	m.id = #{id} and m.deleted=0 
+	</select>
+
+	<!-- 根据用户名，登录密码查询系统用户信息 -->
+	<select id="selectByNamePwd" resultMap="BaseResultMap" >
+		SELECT id,
+			   name,
+			   type,
+			   mobile,
+			   workshop_id
+		  FROM tbl_manager_user
+		  WHERE name = #{record.name}
+		    AND password = #{record.password}
+		    AND deleted = 0
+	</select>
+	
+	<!-- 根据用户名查询系统用户信息 -->
+	<select id="selectByName" resultMap="BaseResultMap" >
+		SELECT id,
+			   name,
+			   type,
+			   mobile,
+			   workshop_id
+		  FROM tbl_manager_user
+		  WHERE name = #{name}
+		    AND deleted = 0
+	</select>
+	
+	<!-- 查询管理员 -->
+	<select id="list" resultMap="BaseResultMap" >
+		SELECT m.id,
+			   m.name,
+			   d.name as depot_name,
+			   w.name as workshop_name,
+			   m.type,
+			   m.mobile,
+			   m.workshop_id
+		  FROM tbl_manager_user m
+		  	   left join tbl_workshop w on m.workshop_id = w.id and w.deleted=0
+		  	   left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		<where>
+		  	m.deleted=0 
+		  	<if test="record.type != null and record.type >-1 ">
+				and m.type=#{record.type}
+			</if>
+		  	<if test="record.name != null and record.name != '' ">
+				AND m.name LIKE CONCAT('%', #{record.name}, '%')
+			</if>
+		  	<if test="record.depotId != null and record.depotId >0 ">
+		  		and w.depot_id=#{record.depotId}
+		  	</if>
+		  	<if test="record.workshopId!= null and record.workshopId>0 ">
+		  		and m.workshop_id=#{record.workshopId}
+		  	</if>
+		</where>
+	</select>
+	
+</mapper>

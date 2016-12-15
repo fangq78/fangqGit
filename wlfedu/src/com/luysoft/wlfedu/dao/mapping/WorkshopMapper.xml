@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.WorkshopMapper" >
+
+	<resultMap id="BaseResultMap" type="Workshop" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="depot_id" property="depotId" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="creator_id" property="creatorId" jdbcType="INTEGER" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="updater_id" property="updaterId" jdbcType="INTEGER" />
+		<result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+		<result column="depot_name" property="depotName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增车间 -->
+	<insert id="insert" parameterType="Workshop" >
+		INSERT INTO tbl_workshop (
+			depot_id,
+			name, 
+			mobile,
+			address,
+			creator_id,
+			created_time,
+			updater_id, 
+			updated_time
+		) VALUES (
+			#{record.depotId},
+			#{record.name},
+			#{record.mobile}, 
+			#{record.address}, 
+			#{userId},
+			NOW(),
+			#{userId}, 
+			NOW()
+		)
+	</insert>
+
+	<!-- 删除车间 -->
+	<delete id="delete" parameterType="java.lang.Integer" >
+		UPDATE tbl_workshop set deleted = 1 
+		 WHERE id = #{id}
+	</delete>
+	
+	<!-- 删除车间 -->
+	<delete id="deleteByDepotId" parameterType="java.lang.Integer" >
+		UPDATE tbl_workshop set deleted = 1 
+		 WHERE depot_id = #{depotId}
+	</delete>
+
+	<!-- 修改车间 -->
+	<update id="update">
+		UPDATE tbl_workshop
+		   SET  depot_id = #{record.depotId},
+		  	    name = #{record.name},
+		   		mobile = #{record.mobile},
+		   		address = #{record.address},
+			   updater_id = #{userId},
+			   updated_time = NOW()
+		 WHERE id = #{record.id}
+	</update>
+
+	<!-- 查询车间 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT id, 
+			   depot_id,
+			   name,
+			   mobile,
+			   address,
+			   creator_id,
+			   created_time,
+			   updater_id,
+			   updated_time
+		  FROM tbl_workshop
+		 WHERE id = #{id}
+		 and deleted = 0
+	</select>
+
+	<!-- 查询车间列表 -->
+	<select id="selectAll" resultMap="BaseResultMap" >
+		SELECT w.id, 
+			   w.depot_id,
+			   w.name,
+			   d.name as depot_name,
+			   w.mobile,
+			   w.address,
+			   w.creator_id,
+			   w.created_time,
+			   w.updater_id,
+			   w.updated_time
+		  FROM tbl_workshop w left join  tbl_depot d on w.depot_id=d.id and d.deleted = 0
+		  <where>
+		  	w.deleted=0
+		  	<if test="record.depotId != null and record.depotId >0 ">
+		  		and w.depot_id=#{record.depotId}
+		  	</if>
+		  </where>
+		   
+	</select>
+</mapper>

@@ -1,0 +1,17 @@
+@charset "utf-8";
+section#pop { display: none; }
+.popupWrapper { width: 25%; margin: 0 auto; padding: 0; position: fixed; top: 50%; left: 50%; z-index: 999; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); }
+.popupBox { margin: 0 auto; padding: 0 0 25px; border: 1px solid #f9f9f9; border-radius: 4px; box-shadow: 0 0 6px #ccc; -webkit-box-shadow: 0 0 6px #ccc; background: #fff; }
+.closeBtn { padding: 0px; margin: 0px; top: 0; right: 0; position: relative; }
+.closeBtn .icon { padding: 0 0; margin: 0px; border-radius: 50px; color: #333; font-size: 30px; line-height: 31px; position: absolute; right: -10px; top: -10px; background: #f1f1f1; }
+.closeBtn:focus, .closeBtn:hover { text-decoration: none; cursor: pointer; filter: alpha(opacity=50); opacity: .5 }
+.textTip { margin: 0 auto; padding: 10px 0; font-size: 18px; color: #343434; text-align: center; background: #fff; border-bottom: 1px solid #d3d3d3; }
+.txtTip { margin: 0 auto; padding: 10px 15px; font-size: 20px; color: #848484; font-weight: 100; text-align: left; line-height: 20px; text-align: center; }
+.buttonBox { overflow: hidden; margin-top: 10px; }
+.btnContent { /*width: 300px;*/ margin: 0px 20px; padding: 8px 0; border-radius: 4px; font-size: 16px; color: #fff; text-align: center; letter-spacing: 1px; background: #0175ef; cursor: pointer; }
+.btnLeft {float: left; width: 35%; margin: 5px auto; margin-left: 30px; padding: 8px 0; border-radius: 4px; color: #fff; text-align: center; letter-spacing: 1px; background: #dd4b39; }
+.btnRight {float: right; width: 35%; margin: 5px auto; margin-right: 30px; padding: 8px 0; border-radius: 4px; color: #fff; text-align: center; letter-spacing: 1px; background: #0175ef; }
+.btnContent:hover, .btnContent:active, .btnRight:hover, .btnRight:active { color: #fff; background: #056edc; }
+.btnLeft:hover, .btnLeft:active { color: #fff; background: #dd3c28; }
+
+.mask { margin: 0 auto; padding: 0px; width: 100%; height: 100%; position: fixed; top: 0; left: 0; background: rgba(0, 0, 0, 0.6); z-index: 998; }

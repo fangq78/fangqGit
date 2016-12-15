@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luysoft.wlfedu.dao.TeamMapper" >
+
+	<resultMap id="BaseResultMap" type="Team" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="depot_id" property="depotId" jdbcType="VARCHAR" />
+		<result column="workshop_id" property="workshopId" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="creator_id" property="creatorId" jdbcType="INTEGER" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="updater_id" property="updaterId" jdbcType="INTEGER" />
+		<result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+		<result column="depot_name" property="depotName" jdbcType="VARCHAR" />
+		<result column="workshop_name" property="workshopName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 新增班组 -->
+	<insert id="insert" parameterType="Team" >
+		INSERT INTO tbl_team (
+			workshop_id,
+			name, 
+			mobile,
+			creator_id,
+			created_time,
+			updater_id, 
+			updated_time
+		) VALUES (
+			#{record.workshopId},
+			#{record.name},
+			#{record.mobile}, 
+			#{userId},
+			NOW(),
+			#{userId}, 
+			NOW()
+		)
+	</insert>
+
+	<!-- 删除班组 -->
+	<delete id="delete" parameterType="java.lang.Integer" >
+		UPDATE tbl_team set deleted = 1 
+		 WHERE id = #{id}
+	</delete>
+	
+	<!-- 删除班组 -->
+	<delete id="deleteByDepotId" parameterType="java.lang.Integer" >
+		UPDATE tbl_team t,tbl_workshop w ,tbl_depot d set t.deleted = 1 
+		 WHERE t.workshop_id=w.id and d.id=w.depot_id and w.depot_id = #{depotId}
+	</delete>
+	
+	<!-- 删除班组 -->
+	<delete id="deleteByWorkshopId" parameterType="java.lang.Integer" >
+		UPDATE tbl_team set deleted = 1 
+		WHERE workshop_id=w.id and t.workshop_id = #{workshopId}
+	</delete>
+
+	<!-- 修改班组 -->
+	<update id="update">
+		UPDATE tbl_team
+		   SET  workshop_id = #{record.workshopId},
+		  	    name = #{record.name},
+		   		mobile = #{record.mobile},
+			   updater_id = #{userId},
+			   updated_time = NOW()
+		 WHERE id = #{record.id}
+	</update>
+
+	<!-- 查询班组 -->
+	<select id="select" resultMap="BaseResultMap" >
+		SELECT t.id, 
+			   w.depot_id,
+			   t.workshop_id,
+			   t.name,
+			   t.mobile,
+			   t.creator_id,
+			   t.created_time,
+			   t.updater_id,
+			   t.updated_time
+		  FROM tbl_team t left join tbl_workshop w on t.workshop_id=w.id and w.deleted=0
+		 WHERE t.id = #{id}
+		 and t.deleted = 0
+	</select>
+
+	<!-- 查询班组列表 -->
+	<select id="selectAll" resultMap="BaseResultMap" >
+		SELECT t.id, 
+			   t.name,
+			   d.name as depot_name,
+			   w.name as workshop_name,
+			   t.mobile,
+			   t.creator_id,
+			   t.created_time,
+			   t.updater_id,
+			   t.updated_time
+		  FROM tbl_team t 
+		  left join tbl_workshop w on t.workshop_id = w.id and w.deleted=0
+		  left join  tbl_depot d on  w.depot_id=d.id and d.deleted = 0 
+		  <where>
+		  	t.deleted=0
+		  	<if test="record.depotId != null and record.depotId >0 ">
+		  		and w.depot_id=#{record.depotId}
+		  	</if>
+		  	<if test="record.workshopId != null and record.workshopId >0 ">
+		  		and t.workshop_id=#{record.workshopId}
+		  	</if>
+		  </where>
+		   
+	</select>
+</mapper>
